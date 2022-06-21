@@ -1,8 +1,16 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const fs = require('fs').promises;
 const { readContentFile } = require('./readWriteFile');
 const randomToken = require('./randomToken');
 const loginValidation = require('./loginValidation');
+const authValidation = require('./authorization');
+
+const { nameValidation, 
+        ageValidation,
+        talkValidation,
+        watchedAtValidation,
+        rateValidation } = require('./talkerValidation');
 
 const app = express();
 app.use(bodyParser.json());
@@ -45,6 +53,26 @@ app.post('/login', loginValidation, (req, res) => {
   if (email && password) {
     return res.status(200).json({ token: randomToken() });
   }
+});
+
+app.use(authValidation);
+
+app.post('/talker',
+  nameValidation,
+  ageValidation,
+  talkValidation,
+  watchedAtValidation,
+  rateValidation, async (req, res) => {
+  const { name, age, talk } = req.body;
+
+  const talkers = await readContentFile();
+
+  const id = talkers.length + 1;
+  const newTalker = { id, name, age, talk };
+  const result = [...talkers, newTalker];
+  
+  await fs.writeFile('./talker.json', JSON.stringify(result));
+  return res.status(201).json(newTalker);
 });
 
 app.listen(PORT, () => {
