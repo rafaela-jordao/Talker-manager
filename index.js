@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const { readContentFile } = require('./readWriteFile');
+const randomToken = require('./randomToken');
 
 const app = express();
 app.use(bodyParser.json());
@@ -33,6 +34,15 @@ app.get('/talker/:id', async (req, res) => {
     return res.status(200).json(talker);
   } catch (error) {
     return res.status(500).end();
+  }
+});
+
+// req. 3 - retorna um token aleatório de 16 caracteres
+app.post('/login', (req, res) => {
+  const { email, password } = req.body;
+  
+  if (email && password) {
+    return res.status(200).json({ token: randomToken() });
   }
 });
 
