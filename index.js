@@ -57,6 +57,7 @@ app.post('/login', loginValidation, (req, res) => {
 
 app.use(authValidation);
 
+// req. 5 - endpoint capaz de adicionar nova pessoa palestrante.
 app.post('/talker',
   nameValidation,
   ageValidation,
@@ -73,6 +74,24 @@ app.post('/talker',
   
   await fs.writeFile('./talker.json', JSON.stringify(result));
   return res.status(201).json(newTalker);
+});
+
+// req. 6 - endpoint capaz de editar. Referência aula dia 22.4 (atualizando objeto através da API).
+app.put('/talker/:id',
+  nameValidation,
+  ageValidation,
+  talkValidation,
+  watchedAtValidation,
+  rateValidation, async (req, res) => {
+    const { id } = req.params;
+    const { name, age, talk } = req.body;
+
+    const talkers = await readContentFile();
+    const talkerIndex = talkers.findIndex((t) => t.id === Number(id));
+
+  talkers[talkerIndex] = { ...talkers[talkerIndex], name, age, talk };
+  await fs.writeFile('./talker.json', JSON.stringify(talkers));
+  return res.status(200).json(talkers[talkerIndex]); 
 });
 
 app.listen(PORT, () => {
