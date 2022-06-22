@@ -55,6 +55,7 @@ app.post('/login', loginValidation, (req, res) => {
   }
 });
 
+// todos os endpoints abaixo serão afetados pelo middlewares authValidation.
 app.use(authValidation);
 
 // req. 5 - endpoint capaz de adicionar nova pessoa palestrante.
@@ -92,6 +93,18 @@ app.put('/talker/:id',
   talkers[talkerIndex] = { ...talkers[talkerIndex], name, age, talk };
   await fs.writeFile('./talker.json', JSON.stringify(talkers));
   return res.status(200).json(talkers[talkerIndex]); 
+});
+
+// req. 7 - endpoint deve deletar uma pessoa com base no id da rota. Referência aula 22.4 (deletanto objeto através da API).
+app.delete('/talker/:id', async (req, res) => {
+  const { id } = req.params;
+
+  const talkers = await readContentFile();
+  const deletIndex = talkers.findIndex((t) => t.id === Number(id));
+
+  talkers.splice(deletIndex, 1);
+  await fs.writeFile('./talker.json', JSON.stringify(talkers));
+  return res.status(204).end();
 });
 
 app.listen(PORT, () => {
